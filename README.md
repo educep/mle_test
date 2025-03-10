@@ -265,13 +265,14 @@ flowchart TB
     subgraph Sources["Data Sources"]
         S1["TB-Scale Files"]
         S2["Millions of Files"]
-        S3["Streaming Data"]
+        S3["Streaming/Batching Data"]
         style Sources fill:#2D3748,color:white
     end
 
     %% Storage Layer
     subgraph Storage["Storage"]
-        GCS["Cloud Storage\n(Partitioned)"]
+        GCS["Cloud Storage
+        (disaster recovery)"]
         style Storage fill:#4A5568,color:white
         style GCS fill:#4A5568,color:white
     end
@@ -305,44 +306,78 @@ flowchart TB
         end
     end
 
-    %% Data Warehouse
-    subgraph Analytics["Analytics"]
-        BQ["BigQuery"]
-        style Analytics fill:#553C9A,color:white
-        style BQ fill:#553C9A,color:white
+    %% Data Warehouse and Data Mart
+    subgraph DataPlatform["Data Platform"]
+        style DataPlatform fill:#553C9A,color:white,stroke:#805AD5
+
+        subgraph Warehouse["Data Warehouse"]
+            RawDWH["Raw Layer"]
+            StagingDWH["Staging Layer"]
+            CoreDWH["Core Layer"]
+            style Warehouse fill:#6B46C1,color:white
+            style RawDWH fill:#6B46C1,color:white
+            style StagingDWH fill:#6B46C1,color:white
+            style CoreDWH fill:#6B46C1,color:white
+        end
+
+        subgraph DataMart["Data Marts"]
+            AnalyticsDM["Analytics Mart"]
+            ReportingDM["Reporting Mart"]
+            MLDataDM["ML Data Mart"]
+            style DataMart fill:#805AD5,color:white
+            style AnalyticsDM fill:#805AD5,color:white
+            style ReportingDM fill:#805AD5,color:white
+            style MLDataDM fill:#805AD5,color:white
+        end
     end
 
     %% Cross-cutting Concerns
     subgraph CrossCutting["Platform Services"]
         Security["Security & IAM"]
         Optimization["Scaling & Cost Control"]
+        DisasterRecovery["Disaster Recovery"]
         style CrossCutting fill:#718096,color:white
         style Security fill:#718096,color:white
         style Optimization fill:#718096,color:white
+        style DisasterRecovery fill:#718096,color:white
     end
 
     %% Serving Layer
     subgraph Serving["Data Serving"]
         API["APIs"]
         Dashboard["Dashboards"]
-        style Serving fill:#805AD5,color:white
-        style API fill:#805AD5,color:white
-        style Dashboard fill:#805AD5,color:white
+        Looker["BI Tools"]
+        style Serving fill:#9F7AEA,color:white
+        style API fill:#9F7AEA,color:white
+        style Dashboard fill:#9F7AEA,color:white
+        style Looker fill:#9F7AEA,color:white
     end
 
     %% Data Flow - Main Path
     Sources --> Storage
     Storage --> Ingestion
     Ingestion --> Processing
-    Processing --> Analytics
-    Analytics --> Serving
+
+    %% Warehouse Flow
+    Processing --> RawDWH
+    RawDWH --> StagingDWH
+    StagingDWH --> CoreDWH
+
+    %% Data Mart Flow
+    CoreDWH --> AnalyticsDM
+    CoreDWH --> ReportingDM
+    CoreDWH --> MLDataDM
+
+    %% Serving Flow
+    DataMart --> Serving
 
     %% Control Flows
     Control ---> Ingestion
     Control ---> Processing
+    Control ---> DataPlatform
 
     %% Cross-cutting Concerns
     CrossCutting -.-> K8s
     CrossCutting -.-> Storage
-    CrossCutting -.-> Analytics
+    CrossCutting -.-> DataPlatform
 ```
