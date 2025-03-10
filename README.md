@@ -261,105 +261,88 @@ These design choices ensure that the pipeline is not only effective for processi
 
 ```mermaid
 flowchart TB
-    subgraph "Data Sources"
-        S1[TB-Scale Files]
-        S2[Millions of Files]
-        S3[Streaming Data]
+    %% Data Sources
+    subgraph Sources["Data Sources"]
+        S1["TB-Scale Files"]
+        S2["Millions of Files"]
+        S3["Streaming Data"]
+        style Sources fill:#2D3748,color:white
     end
 
-    subgraph "Storage Layer"
-        GCS[Cloud Storage\nPartitioned Buckets]
-        style GCS fill:#AEC6CF
+    %% Storage Layer
+    subgraph Storage["Storage"]
+        GCS["Cloud Storage\n(Partitioned)"]
+        style Storage fill:#4A5568,color:white
+        style GCS fill:#4A5568,color:white
     end
 
-    subgraph "Kubernetes Cluster"
-        style Kubernetes fill:#FFFFED,stroke:#333,stroke-width:2
+    %% Processing Cluster
+    subgraph K8s["Kubernetes Cluster"]
+        style K8s fill:#2C5282,color:white,stroke:#63B3ED
 
-        subgraph "Data Ingestion"
-            BatchJob[Batch Ingestion\nJobs]
-            PubSub[Pub/Sub]
+        subgraph Ingestion["Data Ingestion"]
+            BatchJob["Batch Jobs"]
+            PubSub["Pub/Sub"]
+            style Ingestion fill:#3182CE,color:white
+            style BatchJob fill:#3182CE,color:white
+            style PubSub fill:#3182CE,color:white
         end
 
-        subgraph "Processing Layer"
-            Spark[Spark on K8s]
-            Dataflow[Dataflow on K8s]
-            CustomProc[Custom Processors]
+        subgraph Processing["Data Processing"]
+            Spark["Spark"]
+            Dataflow["Dataflow"]
+            style Processing fill:#2B6CB0,color:white
+            style Spark fill:#2B6CB0,color:white
+            style Dataflow fill:#2B6CB0,color:white
         end
 
-        subgraph "Orchestration"
-            Airflow[Airflow/Cloud Composer]
-        end
-
-        subgraph "Monitoring & Control"
-            Prometheus[Prometheus]
-            Logging[Logging]
-            CircuitBreaker[Circuit Breakers]
+        subgraph Control["Control Plane"]
+            Airflow["Airflow/Composer"]
+            Monitoring["Monitoring & Logging"]
+            style Control fill:#2C5282,color:white
+            style Airflow fill:#2C5282,color:white
+            style Monitoring fill:#2C5282,color:white
         end
     end
 
-    subgraph "Data Warehouse"
-        BQ[BigQuery\nPartitioned/Clustered]
-        style BQ fill:#FFD8B1
+    %% Data Warehouse
+    subgraph Analytics["Analytics"]
+        BQ["BigQuery"]
+        style Analytics fill:#553C9A,color:white
+        style BQ fill:#553C9A,color:white
     end
 
-    subgraph "Serving Layer"
-        API[API Services]
-        Dashboard[Dashboards]
+    %% Cross-cutting Concerns
+    subgraph CrossCutting["Platform Services"]
+        Security["Security & IAM"]
+        Optimization["Scaling & Cost Control"]
+        style CrossCutting fill:#718096,color:white
+        style Security fill:#718096,color:white
+        style Optimization fill:#718096,color:white
     end
 
-    %% Data flow connections
-    S1 --> GCS
-    S2 --> GCS
-    S3 --> PubSub
-
-    GCS --> BatchJob
-    PubSub --> Dataflow
-
-    BatchJob --> Spark
-    BatchJob --> Dataflow
-
-    Spark --> GCS
-    Dataflow --> GCS
-    CustomProc --> GCS
-
-    Spark --> BQ
-    Dataflow --> BQ
-    CustomProc --> BQ
-
-    Airflow -- "Orchestrates" --> BatchJob
-    Airflow -- "Orchestrates" --> Spark
-    Airflow -- "Orchestrates" --> Dataflow
-    Airflow -- "Orchestrates" --> CustomProc
-
-    Prometheus -- "Monitors" --> Kubernetes
-    Logging -- "Collects" --> Kubernetes
-    CircuitBreaker -- "Protects" --> Kubernetes
-
-    BQ --> API
-    BQ --> Dashboard
-
-    %% Additional components and flows
-    subgraph "Security & Governance"
-        IAM[IAM & Access Control]
-        Encrypt[Encryption]
-        Audit[Audit Logging]
+    %% Serving Layer
+    subgraph Serving["Data Serving"]
+        API["APIs"]
+        Dashboard["Dashboards"]
+        style Serving fill:#805AD5,color:white
+        style API fill:#805AD5,color:white
+        style Dashboard fill:#805AD5,color:white
     end
 
-    IAM -- "Secures" --> Kubernetes
-    IAM -- "Secures" --> GCS
-    IAM -- "Secures" --> BQ
-    Encrypt -- "Protects" --> GCS
-    Encrypt -- "Protects" --> BQ
-    Audit -- "Tracks" --> Kubernetes
+    %% Data Flow - Main Path
+    Sources --> Storage
+    Storage --> Ingestion
+    Ingestion --> Processing
+    Processing --> Analytics
+    Analytics --> Serving
 
-    subgraph "Resource Management"
-        AutoScale[Auto-scaling]
-        ResourceQuotas[Resource Quotas]
-        CostControls[Cost Controls]
-    end
+    %% Control Flows
+    Control ---> Ingestion
+    Control ---> Processing
 
-    AutoScale -- "Optimizes" --> Kubernetes
-    ResourceQuotas -- "Limits" --> Kubernetes
-    CostControls -- "Monitors" --> Kubernetes
-    CostControls -- "Monitors" --> BQ
+    %% Cross-cutting Concerns
+    CrossCutting -.-> K8s
+    CrossCutting -.-> Storage
+    CrossCutting -.-> Analytics
 ```
