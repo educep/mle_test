@@ -1,0 +1,22 @@
+[flake8]
+max-line-length = 99
+extend-ignore = E501
+    # E731,  # Do not assign a lambda expression, use a def
+    # E266,  # Too many leading '#' for block comment
+    # C901,  # Function is too complex
+    # W503,  # Line break occurred before a binary operator
+    # Ignore line length for comments only
+    # E501,     # line too long
+exclude =
+    .git,
+    notebooks,
+    references,
+    data,
+    .venv,
+    venv,
+    __pycache__,
+    build,
+    dist
+ignore = B008, W503
+    # B008    # function calls in argument defaults.
+    # W503    # line break before binary operator

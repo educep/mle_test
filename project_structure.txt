@@ -1,0 +1,41 @@
+Created by Analitika: contact@analitika.fr
+Folder PATH listing as of 2025-03-10 12:55
+Created with tools.project_tree.DisplayablePath
+
+mle_test/
+├── data/
+│   ├── charts/
+│   ├── input/
+│   └── output/
+├── main.py
+├── src/
+│   ├── __init__.py
+│   ├── ad_hoc/
+│   │   ├── __init__.py
+│   │   ├── analysis.py
+│   │   └── graphs.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── schemas.py
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   ├── extractors.py
+│   │   └── transformers.py
+│   ├── sql_test/
+│   │   ├── __init__.py
+│   │   ├── create_tables/
+│   │   ├── dblite.py
+│   │   ├── local_db/
+│   │   ├── queries/
+│   │   └── synthetic_data.py
+│   └── utils/
+│       ├── __init__.py
+│       ├── helpers.py
+│       └── project_tree.py
+└── tests/
+    ├── __init__.py
+    ├── data/
+    ├── local_db/
+    ├── test_graph_comparison.py
+    ├── test_integration.py
+    └── test_sql.py
